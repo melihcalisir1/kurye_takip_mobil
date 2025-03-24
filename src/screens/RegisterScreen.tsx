@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, Alert } from 'react-native';
+import { View, TextInput, Button, Text, Alert, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
 const RegisterScreen = () => {
+  const navigation = useNavigation<any>();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
   const handleRegister = async () => {
+    if (password !== passwordConfirm) {
+      Alert.alert('Hata', 'Şifreler uyuşmuyor.');
+      return;
+    }
+
     try {
       const res = await axios.post('http://10.0.2.2:8000/api/register', {
         name,
@@ -17,23 +25,84 @@ const RegisterScreen = () => {
         password_confirmation: passwordConfirm
       });
 
-      Alert.alert('Kayıt Başarılı', `Token: ${res.data.token}`);
-      console.log(res.data);
-    } catch (error) {
-      console.log(error.response?.data);
-      Alert.alert('Hata', 'Kayıt sırasında bir hata oluştu.');
-    }
+      Alert.alert('Başarılı', 'Kayıt başarılı! Giriş ekranına yönlendiriliyorsunuz.');
+      navigation.navigate('Login');
+    } catch (error: any) {
+      console.log('Kayıt Hatası:', error?.response?.data);
+    
+      if (error.response && error.response.data) {
+        const errors = error.response.data.errors;
+    
+        if (errors) {
+          const firstError = Object.values(errors)[0][0]; // İlk hata mesajı
+          Alert.alert('Hata', firstError);
+        } else if (error.response.data.message) {
+          Alert.alert('Hata', error.response.data.message);
+        } else {
+          Alert.alert('Hata', 'Kayıt sırasında bilinmeyen bir hata oluştu.');
+        }
+      } else {
+        Alert.alert('Hata', 'Sunucuya ulaşılamıyor. Bağlantıyı kontrol et.');
+      }
+    }    
   };
 
   return (
-    <View style={{ padding: 20 }}>
-      <TextInput placeholder="Ad" value={name} onChangeText={setName} style={{ marginBottom: 10 }} />
-      <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={{ marginBottom: 10 }} />
-      <TextInput placeholder="Şifre" secureTextEntry value={password} onChangeText={setPassword} style={{ marginBottom: 10 }} />
-      <TextInput placeholder="Şifre Tekrar" secureTextEntry value={passwordConfirm} onChangeText={setPasswordConfirm} style={{ marginBottom: 10 }} />
+    <View style={styles.container}>
+      <Text style={styles.title}>📝 Kayıt Ol</Text>
+      <TextInput
+        placeholder="Ad Soyad"
+        value={name}
+        onChangeText={setName}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        style={styles.input}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        placeholder="Şifre"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Şifre Tekrar"
+        secureTextEntry
+        value={passwordConfirm}
+        onChangeText={setPasswordConfirm}
+        style={styles.input}
+      />
       <Button title="Kayıt Ol" onPress={handleRegister} />
     </View>
   );
 };
 
 export default RegisterScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+    alignSelf: 'center',
+    fontWeight: 'bold',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    padding: 10,
+    marginBottom: 12,
+  },
+});

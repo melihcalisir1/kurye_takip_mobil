@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, Text } from 'react-native';
+import {
+  View,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  Text,
+  TouchableOpacity,
+} from 'react-native';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
 const LoginScreen: React.FC = () => {
-  const { login } = useAuth(); // AuthContext'ten login fonksiyonu alınıyor
+  const { login } = useAuth();
+  const navigation = useNavigation<any>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -16,10 +26,7 @@ const LoginScreen: React.FC = () => {
       });
 
       const { token, user } = response.data;
-
-      // Global auth context'te login işlemi yapılıyor
       await login(token, user);
-
     } catch (error: any) {
       console.log('Login error:', error?.response?.data || error.message);
       Alert.alert('Hata', 'Giriş başarısız. Bilgileri kontrol et.');
@@ -44,6 +51,12 @@ const LoginScreen: React.FC = () => {
         secureTextEntry
       />
       <Button title="Giriş Yap" onPress={handleLogin} />
+
+      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+        <Text style={styles.registerText}>
+          Henüz kayıt olmadınız mı? <Text style={styles.registerLink}>Kayıt Ol</Text>
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -68,6 +81,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 20,
     alignSelf: 'center',
+    fontWeight: 'bold',
+  },
+  registerText: {
+    marginTop: 20,
+    textAlign: 'center',
+    fontSize: 14,
+    color: '#444',
+  },
+  registerLink: {
+    color: '#007BFF',
     fontWeight: 'bold',
   },
 });

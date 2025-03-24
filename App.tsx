@@ -11,6 +11,8 @@ import KuryeScreen from './src/screens/KuryeScreen';
 import SirketDashboard from './src/screens/SirketDashboard';
 import AdminPanel from './src/screens/AdminPanel';
 import NotAuthorizedScreen from './src/screens/NotAuthorizedScreen';
+import MusteriScreen from './src/screens/MusteriScreen';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +33,9 @@ const AppRoutes = () => {
         <>
           {userRole === 'kurye' && (
             <Stack.Screen name="KuryeScreen" component={KuryeScreen} />
+          )}
+          {userRole === 'musteri' && (
+            <Stack.Screen name="MusteriScreen" component={MusteriScreen} />
           )}
           {userRole === 'şirket_sahibi' && (
             <Stack.Screen name="SirketDashboard" component={SirketDashboard} />
