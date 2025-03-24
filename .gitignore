@@ -73,3 +73,10 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+/node_modules
+/android/app/debug.keystore
+.env
+.expo
+.idea
+.vscode
