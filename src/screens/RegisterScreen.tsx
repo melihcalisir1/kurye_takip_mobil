@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, Alert, StyleSheet } from 'react-native';
+import { View, TextInput, Button, Text, Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 
@@ -29,10 +29,10 @@ const RegisterScreen = () => {
       navigation.navigate('Login');
     } catch (error: any) {
       console.log('Kayıt Hatası:', error?.response?.data);
-    
+
       if (error.response && error.response.data) {
         const errors = error.response.data.errors;
-    
+
         if (errors) {
           const firstError = Object.values(errors)[0][0]; // İlk hata mesajı
           Alert.alert('Hata', firstError);
@@ -44,11 +44,19 @@ const RegisterScreen = () => {
       } else {
         Alert.alert('Hata', 'Sunucuya ulaşılamıyor. Bağlantıyı kontrol et.');
       }
-    }    
+    }
+  };
+
+  const goBackToLogin = () => {
+    navigation.navigate('Login');
   };
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={goBackToLogin} style={styles.backButton}>
+        <Text style={styles.backText}>← Giriş ekranına dön</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>📝 Kayıt Ol</Text>
       <TextInput
         placeholder="Ad Soyad"
@@ -91,6 +99,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
     backgroundColor: '#fff',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    padding: 6,
+    zIndex: 10,
+  },
+  backText: {
+    color: '#007bff',
+    fontSize: 16,
   },
   title: {
     fontSize: 24,
