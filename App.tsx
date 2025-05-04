@@ -6,13 +6,12 @@ import { ActivityIndicator, View } from 'react-native';
 import { AuthProvider, AuthContext } from './src/context/AuthContext';
 
 import LoginScreen from './src/screens/LoginScreen';
-import RegisterScreen from './src/screens/RegisterScreen';
 import KuryeScreen from './src/screens/KuryeScreen';
 import SirketDashboard from './src/screens/SirketDashboard';
 import AdminPanel from './src/screens/AdminPanel';
 import NotAuthorizedScreen from './src/screens/NotAuthorizedScreen';
-import MusteriScreen from './src/screens/MusteriScreen';
-import OrderCreateScreen from './src/screens/OrderCreateScreen';
+import CreateSirketScreen from './src/screens/CreateSirketScreen';
+
 
 
 
@@ -36,18 +35,16 @@ const AppRoutes = () => {
           {userRole === 'kurye' && (
             <Stack.Screen name="KuryeScreen" component={KuryeScreen} />
           )}
-          {userRole === 'musteri' && (
-            <>
-              <Stack.Screen name="MusteriScreen" component={MusteriScreen} />
-              <Stack.Screen name="OrderCreate" component={OrderCreateScreen} />
-            </>          
-          )}
           {userRole === 'şirket_sahibi' && (
             <Stack.Screen name="SirketDashboard" component={SirketDashboard} />
           )}
           {userRole === 'admin' && (
-            <Stack.Screen name="AdminPanel" component={AdminPanel} />
+            <>
+              <Stack.Screen name="AdminPanel" component={AdminPanel} />
+              <Stack.Screen name="CreateSirket" component={CreateSirketScreen} />
+            </>
           )}
+
           {!['kurye', 'şirket_sahibi', 'admin'].includes(userRole || '') && (
             <Stack.Screen
               name="NotAuthorizedScreen"
@@ -58,7 +55,6 @@ const AppRoutes = () => {
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
         </>
       )}
     </Stack.Navigator>
