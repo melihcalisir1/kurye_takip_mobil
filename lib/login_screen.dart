@@ -78,39 +78,115 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Giriş Yap')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: 'E-posta',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(
-                labelText: 'Şifre',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: login,
-                    child: Text('Giriş Yap'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 50),
+      backgroundColor: const Color(0xFFF5F6FA),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 32),
+                  child: Column(
+                    children: [
+                      Icon(Icons.delivery_dining, size: 72, color: Color(0xFF007AFF)),
+                      SizedBox(height: 12),
+                      Text(
+                        'Kurye Takip',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF222B45),
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Giriş Yap',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Color(0xFF8F9BB3),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      hintText: 'E-posta',
+                      prefixIcon: Icon(Icons.email_outlined),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 18),
                     ),
                   ),
-          ],
+                ),
+                SizedBox(height: 18),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Şifre',
+                      prefixIcon: Icon(Icons.lock_outline),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 18),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF007AFF),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: isLoading
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            'Giriş Yap',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                ),
+                SizedBox(height: 18),
+                Text(
+                  '© 2025 Kurye Takip',
+                  style: TextStyle(color: Color(0xFF8F9BB3), fontSize: 14),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
