@@ -14,6 +14,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isCustomDateRange = false;
+  String _selectedCourier = 'Tümü';
+  String _selectedRegion = 'Tümü';
+  String _selectedStatus = 'Tümü';
+  String _selectedChartType = 'Çizgi';
+
+  final List<String> _couriers = ['Tümü', 'Ahmet Yılmaz', 'Mehmet Demir', 'Ayşe Kaya'];
+  final List<String> _regions = ['Tümü', 'Kadıköy', 'Beşiktaş', 'Üsküdar', 'Şişli'];
+  final List<String> _statuses = ['Tümü', 'Tamamlandı', 'Beklemede', 'İptal'];
+  final List<String> _chartTypes = ['Çizgi', 'Pasta', 'Çubuk'];
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +31,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
         title: const Text('Raporlar'),
         backgroundColor: Colors.blue,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFilterDialog,
+            tooltip: 'Filtrele',
+          ),
           IconButton(
             icon: const Icon(Icons.download),
             onPressed: _downloadReport,
@@ -39,6 +53,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
             const SizedBox(height: 24),
             _buildSummaryCards(),
             const SizedBox(height: 24),
+            _buildChartTypeSelector(),
+            const SizedBox(height: 16),
             _buildChartCard(),
             const SizedBox(height: 24),
             _buildDetailedReport(),
@@ -247,6 +263,29 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 
+  Widget _buildChartTypeSelector() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: _chartTypes.map((type) {
+        final isSelected = _selectedChartType == type;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: ChoiceChip(
+            label: Text(type),
+            selected: isSelected,
+            onSelected: (selected) {
+              if (selected) {
+                setState(() {
+                  _selectedChartType = type;
+                });
+              }
+            },
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildChartCard() {
     return Card(
       child: Padding(
@@ -264,31 +303,81 @@ class _ReportsScreenState extends State<ReportsScreen> {
             const SizedBox(height: 16),
             SizedBox(
               height: 200,
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(show: false),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: [
-                        const FlSpot(0, 3),
-                        const FlSpot(1, 1),
-                        const FlSpot(2, 4),
-                        const FlSpot(3, 2),
-                        const FlSpot(4, 5),
-                      ],
-                      isCurved: true,
-                      color: Colors.blue,
-                      barWidth: 3,
-                      dotData: FlDotData(show: false),
-                    ),
-                  ],
-                ),
-              ),
+              child: _selectedChartType == 'Çizgi'
+                  ? _buildLineChart()
+                  : _selectedChartType == 'Pasta'
+                      ? _buildPieChart()
+                      : _buildBarChart(),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLineChart() {
+    return LineChart(
+      LineChartData(
+        gridData: FlGridData(show: false),
+        titlesData: FlTitlesData(show: false),
+        borderData: FlBorderData(show: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: [
+              const FlSpot(0, 3),
+              const FlSpot(1, 1),
+              const FlSpot(2, 4),
+              const FlSpot(3, 2),
+              const FlSpot(4, 5),
+            ],
+            isCurved: true,
+            color: Colors.blue,
+            barWidth: 3,
+            dotData: FlDotData(show: false),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPieChart() {
+    return PieChart(
+      PieChartData(
+        sections: [
+          PieChartSectionData(
+            value: 40,
+            title: 'Tamamlandı',
+            color: Colors.green,
+            radius: 50,
+          ),
+          PieChartSectionData(
+            value: 30,
+            title: 'Beklemede',
+            color: Colors.orange,
+            radius: 50,
+          ),
+          PieChartSectionData(
+            value: 30,
+            title: 'İptal',
+            color: Colors.red,
+            radius: 50,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBarChart() {
+    return BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: 20,
+        barGroups: [
+          BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 15)]),
+          BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 10)]),
+          BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 18)]),
+          BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 12)]),
+        ],
       ),
     );
   }
@@ -376,6 +465,85 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Filtreleme Seçenekleri'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildFilterDropdown('Kurye', _selectedCourier, _couriers, (value) {
+              setState(() => _selectedCourier = value!);
+            }),
+            const SizedBox(height: 16),
+            _buildFilterDropdown('Bölge', _selectedRegion, _regions, (value) {
+              setState(() => _selectedRegion = value!);
+            }),
+            const SizedBox(height: 16),
+            _buildFilterDropdown('Durum', _selectedStatus, _statuses, (value) {
+              setState(() => _selectedStatus = value!);
+            }),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Kapat'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Filtreleri uygula
+              Navigator.pop(context);
+            },
+            child: const Text('Uygula'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterDropdown(
+    String label,
+    String value,
+    List<String> items,
+    Function(String?) onChanged,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: value,
+          items: items.map((item) {
+            return DropdownMenuItem(
+              value: item,
+              child: Text(item),
+            );
+          }).toList(),
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+          ),
+        ),
+      ],
     );
   }
 } 
