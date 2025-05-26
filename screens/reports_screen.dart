@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({Key? key}) : super(key: key);
@@ -10,6 +11,9 @@ class ReportsScreen extends StatefulWidget {
 
 class _ReportsScreenState extends State<ReportsScreen> {
   String _selectedPeriod = 'Günlük';
+  DateTime? _startDate;
+  DateTime? _endDate;
+  bool _isCustomDateRange = false;
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +21,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
       appBar: AppBar(
         title: const Text('Raporlar'),
         backgroundColor: Colors.blue,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: _downloadReport,
+            tooltip: 'Raporu İndir',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -24,6 +35,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildPeriodSelector(),
+            if (_isCustomDateRange) _buildDateRangeSelector(),
             const SizedBox(height: 24),
             _buildSummaryCards(),
             const SizedBox(height: 24),
@@ -58,11 +70,106 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 _buildPeriodButton('Haftalık'),
                 _buildPeriodButton('Aylık'),
                 _buildPeriodButton('Yıllık'),
+                _buildPeriodButton('Özel'),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDateRangeSelector() {
+    return Card(
+      margin: const EdgeInsets.only(top: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Tarih Aralığı',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDatePicker(
+                    'Başlangıç',
+                    _startDate,
+                    (date) => setState(() => _startDate = date),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildDatePicker(
+                    'Bitiş',
+                    _endDate,
+                    (date) => setState(() => _endDate = date),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDatePicker(
+    String label,
+    DateTime? date,
+    Function(DateTime?) onDateSelected,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () async {
+            final selectedDate = await showDatePicker(
+              context: context,
+              initialDate: date ?? DateTime.now(),
+              firstDate: DateTime(2020),
+              lastDate: DateTime.now(),
+            );
+            if (selectedDate != null) {
+              onDateSelected(selectedDate);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  date != null
+                      ? DateFormat('dd/MM/yyyy').format(date)
+                      : 'Tarih Seçin',
+                  style: TextStyle(
+                    color: date != null ? Colors.black : Colors.grey,
+                  ),
+                ),
+                const Icon(Icons.calendar_today, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -72,6 +179,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       onPressed: () {
         setState(() {
           _selectedPeriod = period;
+          _isCustomDateRange = period == 'Özel';
         });
       },
       style: ElevatedButton.styleFrom(
@@ -230,6 +338,43 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _downloadReport() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rapor İndir'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Rapor formatını seçin:'),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // PDF indirme işlemi
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.picture_as_pdf),
+                  label: const Text('PDF'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Excel indirme işlemi
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.table_chart),
+                  label: const Text('Excel'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
