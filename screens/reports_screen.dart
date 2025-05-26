@@ -319,8 +319,33 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return LineChart(
       LineChartData(
         gridData: FlGridData(show: false),
-        titlesData: FlTitlesData(show: false),
-        borderData: FlBorderData(show: false),
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 40,
+              getTitlesWidget: (value, meta) {
+                return Text(
+                  value.toInt().toString(),
+                  style: const TextStyle(fontSize: 12),
+                );
+              },
+            ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum'];
+                return Text(
+                  days[value.toInt()],
+                  style: const TextStyle(fontSize: 12),
+                );
+              },
+            ),
+          ),
+        ),
+        borderData: FlBorderData(show: true),
         lineBarsData: [
           LineChartBarData(
             spots: [
@@ -333,9 +358,54 @@ class _ReportsScreenState extends State<ReportsScreen> {
             isCurved: true,
             color: Colors.blue,
             barWidth: 3,
-            dotData: FlDotData(show: false),
+            dotData: FlDotData(
+              show: true,
+              getDotPainter: (spot, percent, barData, index) {
+                return FlDotCirclePainter(
+                  radius: 6,
+                  color: Colors.blue,
+                  strokeWidth: 2,
+                  strokeColor: Colors.white,
+                );
+              },
+            ),
+            belowBarData: BarAreaData(
+              show: true,
+              color: Colors.blue.withOpacity(0.2),
+            ),
           ),
         ],
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            tooltipBgColor: Colors.blue.withOpacity(0.8),
+            getTooltipItems: (List<LineBarSpot> touchedSpots) {
+              return touchedSpots.map((spot) {
+                return LineTooltipItem(
+                  '${spot.y.toInt()} Teslimat',
+                  const TextStyle(color: Colors.white),
+                );
+              }).toList();
+            },
+          ),
+          handleBuiltInTouches: true,
+          getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
+            return spotIndexes.map((spotIndex) {
+              return TouchedSpotIndicatorData(
+                FlLine(color: Colors.blue, strokeWidth: 2),
+                FlDotData(
+                  getDotPainter: (spot, percent, barData, index) {
+                    return FlDotCirclePainter(
+                      radius: 8,
+                      color: Colors.blue,
+                      strokeWidth: 2,
+                      strokeColor: Colors.white,
+                    );
+                  },
+                ),
+              );
+            }).toList();
+          },
+        ),
       ),
     );
   }
@@ -346,23 +416,55 @@ class _ReportsScreenState extends State<ReportsScreen> {
         sections: [
           PieChartSectionData(
             value: 40,
-            title: 'Tamamlandı',
+            title: '40%',
+            titleStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
             color: Colors.green,
             radius: 50,
           ),
           PieChartSectionData(
             value: 30,
-            title: 'Beklemede',
+            title: '30%',
+            titleStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
             color: Colors.orange,
             radius: 50,
           ),
           PieChartSectionData(
             value: 30,
-            title: 'İptal',
+            title: '30%',
+            titleStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
             color: Colors.red,
             radius: 50,
           ),
         ],
+        sectionsSpace: 2,
+        centerSpaceRadius: 0,
+        startDegreeOffset: -90,
+        pieTouchData: PieTouchData(
+          touchCallback: (FlTouchEvent event, pieTouchResponse) {
+            if (event is FlTapUpEvent) {
+              final section = pieTouchResponse?.touchedSection;
+              if (section != null) {
+                _showChartDetails(
+                  'Teslimat Durumu',
+                  [
+                    {'Tamamlandı': '40%'},
+                    {'Beklemede': '30%'},
+                    {'İptal': '30%'},
+                  ],
+                );
+              }
+            }
+          },
+        ),
       ),
     );
   }
@@ -373,11 +475,100 @@ class _ReportsScreenState extends State<ReportsScreen> {
         alignment: BarChartAlignment.spaceAround,
         maxY: 20,
         barGroups: [
-          BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 15)]),
-          BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 10)]),
-          BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 18)]),
-          BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 12)]),
+          BarChartGroupData(
+            x: 0,
+            barRods: [
+              BarChartRodData(
+                toY: 15,
+                color: Colors.blue,
+                width: 20,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(4),
+                ),
+              ),
+            ],
+          ),
+          BarChartGroupData(
+            x: 1,
+            barRods: [
+              BarChartRodData(
+                toY: 10,
+                color: Colors.blue,
+                width: 20,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(4),
+                ),
+              ),
+            ],
+          ),
+          BarChartGroupData(
+            x: 2,
+            barRods: [
+              BarChartRodData(
+                toY: 18,
+                color: Colors.blue,
+                width: 20,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(4),
+                ),
+              ),
+            ],
+          ),
+          BarChartGroupData(
+            x: 3,
+            barRods: [
+              BarChartRodData(
+                toY: 12,
+                color: Colors.blue,
+                width: 20,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(4),
+                ),
+              ),
+            ],
+          ),
         ],
+        titlesData: FlTitlesData(
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 40,
+              getTitlesWidget: (value, meta) {
+                return Text(
+                  value.toInt().toString(),
+                  style: const TextStyle(fontSize: 12),
+                );
+              },
+            ),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (value, meta) {
+                const regions = ['Kadıköy', 'Beşiktaş', 'Üsküdar', 'Şişli'];
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    regions[value.toInt()],
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        borderData: FlBorderData(show: true),
+        barTouchData: BarTouchData(
+          touchTooltipData: BarTouchTooltipData(
+            tooltipBgColor: Colors.blue.withOpacity(0.8),
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              return BarTooltipItem(
+                '${rod.toY.toInt()} Teslimat',
+                const TextStyle(color: Colors.white),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -544,6 +735,42 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showChartDetails(String title, List<Map<String, String>> details) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: details.map((detail) {
+            final entry = detail.entries.first;
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(entry.key),
+                  Text(
+                    entry.value,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Kapat'),
+          ),
+        ],
+      ),
     );
   }
 } 
